@@ -35,6 +35,26 @@ npm run dev
 
 The Docker setup runs the API, worker, PostgreSQL, Redis, and RabbitMQ locally.
 
+Install Docker Desktop for Mac first if `docker --version` does not work:
+
+```text
+https://docs.docker.com/desktop/setup/install/mac-install/
+```
+
+After installation, open Docker Desktop once and verify the CLI:
+
+```bash
+docker --version
+docker compose version
+```
+
+```bash
+make docker-migrate
+make docker-up
+```
+
+Equivalent direct Docker commands:
+
 ```bash
 docker compose --profile tools run --rm migrate
 docker compose up --build
@@ -65,6 +85,16 @@ If Redis is unavailable, the API falls back to an in-memory limiter so auth stay
 RATE_LIMIT_ENABLED=true
 AUTH_RATE_LIMIT_MAX_REQUESTS=10
 AUTH_RATE_LIMIT_WINDOW_SECONDS=900
+```
+
+Common Docker commands:
+
+```bash
+make docker-ps
+make docker-logs
+make docker-down
+make docker-reset
+make docker-test-register
 ```
 
 ## API
