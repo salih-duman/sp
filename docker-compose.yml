@@ -1,0 +1,125 @@
+services:
+  api:
+    build: .
+    command: node src/server.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_BASE_URL: http://localhost:3000
+      BCRYPT_ROUNDS: "12"
+      DATABASE_SSL: "false"
+      DATABASE_URL: postgres://app_user:app_password@postgres:5432/app_db
+      HOST: 0.0.0.0
+      JWT_EXPIRES_IN: 1h
+      JWT_SECRET: local-dev-secret-with-at-least-32-characters
+      NODE_ENV: development
+      PORT: "3000"
+      QUEUE_ENABLED: "true"
+      RABBITMQ_EXCHANGE: app.events
+      RABBITMQ_URL: amqp://app_user:app_password@rabbitmq:5672
+      RABBITMQ_USER_REGISTERED_QUEUE: user.registered
+      REDIS_URL: redis://redis:6379
+      REGISTRATION_ENABLED: "true"
+      REQUIRE_HTTPS: "false"
+      TRUST_PROXY: "1"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    build: .
+    command: node src/workers/index.js
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DATABASE_SSL: "false"
+      DATABASE_URL: postgres://app_user:app_password@postgres:5432/app_db
+      JWT_SECRET: local-dev-secret-with-at-least-32-characters
+      NODE_ENV: development
+      QUEUE_ENABLED: "true"
+      RABBITMQ_EXCHANGE: app.events
+      RABBITMQ_URL: amqp://app_user:app_password@rabbitmq:5672
+      RABBITMQ_USER_REGISTERED_QUEUE: user.registered
+    restart: unless-stopped
+
+  migrate:
+    build: .
+    command: node src/db/migrate.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_SSL: "false"
+      DATABASE_URL: postgres://app_user:app_password@postgres:5432/app_db
+      JWT_SECRET: local-dev-secret-with-at-least-32-characters
+      NODE_ENV: development
+    profiles:
+      - tools
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_USER: app_user
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_PASS: app_password
+      RABBITMQ_DEFAULT_USER: app_user
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:

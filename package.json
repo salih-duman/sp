@@ -1,0 +1,31 @@
+{
+  "name": "dev-duman-api",
+  "version": "1.0.0",
+  "description": "Production-style Node.js backend for dev.duman.dev",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:migrate": "node src/db/migrate.js",
+    "worker": "node src/workers/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "express",
+    "postgresql",
+    "jwt"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "amqplib": "^2.0.1",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.22.0"
+  }
+}
