@@ -20,6 +20,9 @@ services:
       NODE_ENV: development
       PORT: "3000"
       QUEUE_ENABLED: "true"
+      RATE_LIMIT_ENABLED: "true"
+      AUTH_RATE_LIMIT_MAX_REQUESTS: "10"
+      AUTH_RATE_LIMIT_WINDOW_SECONDS: "900"
       RABBITMQ_EXCHANGE: app.events
       RABBITMQ_URL: amqp://app_user:app_password@rabbitmq:5672
       RABBITMQ_USER_REGISTERED_QUEUE: user.registered
@@ -53,6 +56,7 @@ services:
       JWT_SECRET: local-dev-secret-with-at-least-32-characters
       NODE_ENV: development
       QUEUE_ENABLED: "true"
+      RATE_LIMIT_ENABLED: "true"
       RABBITMQ_EXCHANGE: app.events
       RABBITMQ_URL: amqp://app_user:app_password@rabbitmq:5672
       RABBITMQ_USER_REGISTERED_QUEUE: user.registered

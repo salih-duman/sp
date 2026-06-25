@@ -1,4 +1,5 @@
 const { createApp } = require('./app');
+const { closeRedis } = require('./cache/redis');
 const { env } = require('./config/env');
 const { closePool } = require('./db/pool');
 const { closeRabbit } = require('./queues/rabbitmq');
@@ -38,6 +39,7 @@ async function shutdown(signal, exitCode = 0) {
 
   server.close(async () => {
     await closeRabbit();
+    await closeRedis();
     await closePool();
     clearTimeout(forceShutdown);
     process.exit(exitCode);

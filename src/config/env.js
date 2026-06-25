@@ -74,11 +74,14 @@ const env = {
   jwtSecret: required('JWT_SECRET'),
   nodeEnv,
   port: parseInteger('PORT', 3000),
+  authRateLimitMaxRequests: parseInteger('AUTH_RATE_LIMIT_MAX_REQUESTS', 10),
+  authRateLimitWindowSeconds: parseInteger('AUTH_RATE_LIMIT_WINDOW_SECONDS', 900),
   queueEnabled: parseBoolean('QUEUE_ENABLED', false),
   rabbitmqExchange: process.env.RABBITMQ_EXCHANGE || 'app.events',
   rabbitmqUrl: process.env.RABBITMQ_URL || '',
   rabbitmqUserRegisteredQueue:
     process.env.RABBITMQ_USER_REGISTERED_QUEUE || 'user.registered',
+  rateLimitEnabled: parseBoolean('RATE_LIMIT_ENABLED', true),
   redisUrl: process.env.REDIS_URL || '',
   registrationEnabled: parseBoolean('REGISTRATION_ENABLED', true),
   requireHttps: parseBoolean('REQUIRE_HTTPS', false),
@@ -95,6 +98,14 @@ if (env.bcryptRounds < 10 || env.bcryptRounds > 15) {
 
 if (env.queueEnabled && !env.rabbitmqUrl) {
   throw new Error('RABBITMQ_URL is required when QUEUE_ENABLED=true');
+}
+
+if (env.authRateLimitMaxRequests < 1) {
+  throw new Error('AUTH_RATE_LIMIT_MAX_REQUESTS must be greater than 0');
+}
+
+if (env.authRateLimitWindowSeconds < 1) {
+  throw new Error('AUTH_RATE_LIMIT_WINDOW_SECONDS must be greater than 0');
 }
 
 module.exports = { env };

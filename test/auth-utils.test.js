@@ -7,6 +7,7 @@ const test = require('node:test');
 
 const { hashPassword, verifyPassword } = require('../src/services/passwords');
 const { createEvent } = require('../src/queues/rabbitmq');
+const { createRateLimiter, hashIdentifier } = require('../src/middleware/rate-limit');
 const { signAuthToken, verifyAuthToken } = require('../src/services/tokens');
 const {
   normalizeEmail,
@@ -65,3 +66,57 @@ test('creates queue events with metadata', () => {
   assert.equal(event.payload.user.email, 'user@example.com');
   assert.doesNotThrow(() => new Date(event.occurredAt).toISOString());
 });
+
+test('hashes rate limit identifiers without exposing raw values', () => {
+  const hash = hashIdentifier('127.0.0.1:user@example.com');
+
+  assert.equal(hash.length, 64);
+  assert.notEqual(hash, '127.0.0.1:user@example.com');
+});
+
+test('rate limiter blocks requests after the configured limit', async () => {
+  const limiter = createRateLimiter({
+    identifier: () => 'unit-test-user',
+    keyPrefix: 'rate-limit:test',
+    limit: 1,
+    windowSeconds: 60,
+  });
+
+  const req = { body: {}, get: () => undefined, ip: '127.0.0.1' };
+  const first = createMockResponse();
+  let nextCalls = 0;
+
+  await limiter(req, first, () => {
+    nextCalls += 1;
+  });
+
+  const second = createMockResponse();
+
+  await limiter(req, second, () => {
+    nextCalls += 1;
+  });
+
+  assert.equal(nextCalls, 1);
+  assert.equal(first.statusCode, 200);
+  assert.equal(second.statusCode, 429);
+  assert.equal(second.body.error.code, 'rate_limit_exceeded');
+});
+
+function createMockResponse() {
+  return {
+    body: null,
+    headers: {},
+    statusCode: 200,
+    json(body) {
+      this.body = body;
+      return this;
+    },
+    setHeader(name, value) {
+      this.headers[name.toLowerCase()] = value;
+    },
+    status(statusCode) {
+      this.statusCode = statusCode;
+      return this;
+    },
+  };
+}

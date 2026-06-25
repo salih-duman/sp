@@ -58,6 +58,15 @@ curl -X POST http://localhost:3000/auth/register \
   -d '{"email":"local@example.com","password":"very-secure-password","name":"Local User"}'
 ```
 
+Redis backs auth rate limiting for `POST /auth/register` and `POST /auth/login`.
+If Redis is unavailable, the API falls back to an in-memory limiter so auth stays protected without failing closed.
+
+```text
+RATE_LIMIT_ENABLED=true
+AUTH_RATE_LIMIT_MAX_REQUESTS=10
+AUTH_RATE_LIMIT_WINDOW_SECONDS=900
+```
+
 ## API
 
 ```text

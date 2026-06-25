@@ -2,6 +2,7 @@ const express = require('express');
 
 const { env } = require('../config/env');
 const { requireAuth } = require('../middleware/auth');
+const { authRateLimiter } = require('../middleware/rate-limit');
 const { createUser, findUserByEmail, toPublicUser } = require('../repositories/users');
 const { hashPassword, verifyPassword } = require('../services/passwords');
 const { signAuthToken } = require('../services/tokens');
@@ -16,7 +17,7 @@ const {
 
 const router = express.Router();
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', authRateLimiter, async (req, res, next) => {
   if (!env.registrationEnabled) {
     return res.status(403).json({
       error: {
@@ -74,7 +75,7 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', authRateLimiter, async (req, res, next) => {
   const emailError = validateEmail(req.body?.email);
   const passwordError =
     typeof req.body?.password === 'string' ? null : 'Password is required.';
