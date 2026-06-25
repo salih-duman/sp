@@ -18,5 +18,16 @@ module.exports = {
       env: productionEnv,
       env_production: productionEnv,
     },
+    {
+      name: 'worker',
+      script: 'src/workers/index.js',
+      instances: 1,
+      exec_mode: 'fork',
+      watch: false,
+      max_memory_restart: '250M',
+      time: true,
+      env: productionEnv,
+      env_production: productionEnv,
+    },
   ],
 };

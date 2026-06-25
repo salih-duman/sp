@@ -50,7 +50,6 @@ fi
 mv "${NEXT_DIR}" "${APP_DIR}"
 
 cd "${APP_DIR}"
-pm2 delete app >/dev/null 2>&1 || true
-pm2 start ecosystem.config.cjs --env production
+pm2 startOrReload ecosystem.config.cjs --env production --update-env
 pm2 save
 pm2 list
