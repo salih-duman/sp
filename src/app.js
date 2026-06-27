@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('node:path');
 
 const { env } = require('./config/env');
 const { errorHandler, notFound } = require('./middleware/errors');
@@ -19,7 +20,9 @@ function createApp() {
   app.use(requireHttps);
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+  app.use(express.static(path.resolve(process.cwd(), 'public')));
 
+  app.use('/api', routes);
   app.use(routes);
   app.use(notFound);
   app.use(errorHandler);

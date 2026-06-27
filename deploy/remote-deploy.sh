@@ -4,6 +4,7 @@ set -euo pipefail
 ARCHIVE_PATH="${1:-/tmp/dev-duman-api.tgz}"
 APP_DIR="/home/salihdmn/app"
 BACKUP_DIR="/home/salihdmn/backups"
+FRONTEND_DIR="/var/www/dev-duman/public"
 STAMP="$(date +%Y%m%d%H%M%S)"
 NEXT_DIR="/home/salihdmn/app.next.${STAMP}"
 BACKUP_APP_DIR="${BACKUP_DIR}/app.${STAMP}"
@@ -48,6 +49,12 @@ if [ -d "${APP_DIR}" ]; then
 fi
 
 mv "${NEXT_DIR}" "${APP_DIR}"
+
+if [ -d "$(dirname "${FRONTEND_DIR}")" ]; then
+  rm -rf "${FRONTEND_DIR}"
+  mkdir -p "${FRONTEND_DIR}"
+  cp -a "${APP_DIR}/public/." "${FRONTEND_DIR}/"
+fi
 
 cd "${APP_DIR}"
 pm2 startOrReload ecosystem.config.cjs --env production --update-env

@@ -64,6 +64,8 @@ Useful local URLs:
 
 ```text
 API: http://localhost:3000
+Frontend: http://localhost:3000
+API prefix: http://localhost:3000/api
 RabbitMQ Management: http://localhost:15672
 RabbitMQ user/password: app_user / app_password
 PostgreSQL: localhost:5432, app_db, app_user / app_password
@@ -73,7 +75,7 @@ Redis: localhost:6379
 The worker consumes `user.registered` events from RabbitMQ. Registering a user through the API publishes that event:
 
 ```bash
-curl -X POST http://localhost:3000/auth/register \
+curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"local@example.com","password":"very-secure-password","name":"Local User"}'
 ```
@@ -100,11 +102,11 @@ make docker-test-register
 ## API
 
 ```text
-GET  /health
-GET  /ready
-POST /auth/register
-POST /auth/login
-GET  /auth/me
+GET  /api/health
+GET  /api/ready
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
 ```
 
 `/auth/me` expects:
@@ -161,6 +163,7 @@ sudo systemctl reload nginx
 ```
 
 The Nginx config redirects HTTP to HTTPS and proxies only to `http://127.0.0.1:3000`.
+The public frontend is served from `/var/www/dev-duman/public`, and backend traffic is exposed under `/api`.
 
 ## PM2
 
@@ -174,6 +177,7 @@ pm2 save
 ## Verification
 
 ```bash
-curl -I https://dev.duman.dev/health
-curl https://dev.duman.dev/ready
+curl -I https://dev.duman.dev/
+curl https://dev.duman.dev/api/health
+curl https://dev.duman.dev/api/ready
 ```

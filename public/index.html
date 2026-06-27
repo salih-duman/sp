@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dev.duman.dev</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #172026;
+        background: #f4f7f8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(180deg, rgba(244, 247, 248, 0.92), rgba(244, 247, 248, 0.98)),
+          url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=80") center / cover fixed;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 16px 0 36px;
+      }
+
+      .brand {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #bfd1d6;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 14px;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #16a36a;
+      }
+
+      .hero {
+        padding: 64px 0 48px;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin: 0;
+        font-size: clamp(44px, 7vw, 92px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 680px;
+        margin: 28px 0 0;
+        font-size: 20px;
+        line-height: 1.6;
+        color: #415057;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 56px;
+      }
+
+      .card {
+        min-height: 170px;
+        border: 1px solid rgba(150, 171, 177, 0.55);
+        border-radius: 8px;
+        padding: 22px;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(10px);
+      }
+
+      .card h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .card p {
+        margin: 0;
+        color: #4f5f66;
+        line-height: 1.55;
+      }
+
+      code {
+        font: 600 0.95em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: #0f5c74;
+      }
+
+      @media (max-width: 760px) {
+        main {
+          width: min(100% - 24px, 1120px);
+          padding-top: 24px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+          padding-bottom: 24px;
+        }
+
+        .hero {
+          padding-top: 40px;
+        }
+
+        .lead {
+          font-size: 17px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+          margin-top: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="topbar">
+        <div class="brand">dev.duman.dev</div>
+        <div class="status"><span class="dot"></span><span id="api-status">Checking API</span></div>
+      </header>
+
+      <section class="hero">
+        <h1>Production backend lab</h1>
+        <p class="lead">
+          A learning stack for Node.js, PostgreSQL, Redis, RabbitMQ, PM2, Nginx, Docker, and cloud deployment.
+        </p>
+      </section>
+
+      <section class="grid" aria-label="Stack overview">
+        <article class="card">
+          <h2>Frontend Root</h2>
+          <p>This page is served from <code>/</code>. Nginx serves static files before falling back to this shell.</p>
+        </article>
+        <article class="card">
+          <h2>Backend API</h2>
+          <p>Express remains private on localhost. Public API traffic goes through <code>/api</code>.</p>
+        </article>
+        <article class="card">
+          <h2>Services</h2>
+          <p>PostgreSQL stores users, Redis protects auth, and RabbitMQ sends background events to the worker.</p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      fetch('/api/health')
+        .then((response) => response.ok ? response.json() : Promise.reject(response))
+        .then((data) => {
+          document.getElementById('api-status').textContent = `API ${data.status}`;
+        })
+        .catch(() => {
+          document.getElementById('api-status').textContent = 'API unavailable';
+        });
+    </script>
+  </body>
+</html>
